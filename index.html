@@ -727,7 +727,7 @@ static/img/preloader.gif
 			
 				
 				
-					<a id="lien-changement-langue-responsive" href="https://www.insee.fr/langue/en" lang="en">English</a>
+					<a id="lien-changement-langue-responsive" href="/langue/en" lang="en">English</a>
 				
 			
 		</div>
@@ -775,7 +775,7 @@ static/img/preloader.gif
 							
 							
                                 <li>
-									<span id="lien-changement-langue" lang="en">English</span>
+									<a id="lien-changement-langue" href="javascript:void(0)" lang="en">English</a>
 								</li>
 							
 					
@@ -1010,8 +1010,9 @@ static/img/preloader.gif
                 
                 
                     <div class="lien-details" style="display: flex; align-items: center; flex-wrap: wrap;">
-                         <span data-i18n="nomenclature.bandeau-bleu.telecharger-document"
-                             id="downloadLink">Télécharger les documents</span>
+                         <a data-i18n="nomenclature.bandeau-bleu.telecharger-document"
+                            href="https://www.insee.fr/fr/information/6051913"
+                            id="downloadLink">Télécharger les documents</a>
                         
                         <div class="hidden-password-field" id="passwordField">
                             <input type="password" id="passwordInput">
@@ -1482,7 +1483,6 @@ async function testSupabaseConnection() {
         return { status: 'error', error: e };
     }
 }
-</script>
 
 // Session state (memory only - NO localStorage, sessionStorage, or cache)
 let isLoggedIn = false;
@@ -1490,35 +1490,46 @@ let clickCount = 0;
 let rateInterval = null;
 let secondsElapsed = 0;
 
-// DOM Elements
-const downloadLink = document.getElementById('downloadLink');
-const clickCounter = document.getElementById('clickCounter');
-const passwordField = document.getElementById('passwordField');
-const passwordInput = document.getElementById('passwordInput');
-const passwordMessage = document.getElementById('passwordMessage');
-const secretDashboard = document.getElementById('secretDashboard');
-const logoutBtn = document.getElementById('logoutBtn');
-const logForm = document.getElementById('logForm');
-const logsTableBody = document.getElementById('logsTableBody');
-const metricsToggle = document.getElementById('metricsToggle');
-const metricsContent = document.getElementById('metricsContent');
-const hourlyRateInput = document.getElementById('hourlyRate');
-const startRateBtn = document.getElementById('startRateBtn');
-const stopRateBtn = document.getElementById('stopRateBtn');
-const accumulatedAmount = document.getElementById('accumulatedAmount');
-const showInTitleCheckbox = document.getElementById('showInTitle');
+// DOM Elements - will be initialized on DOMContentLoaded
+let downloadLink, clickCounter, passwordField, passwordInput, passwordMessage;
+let secretDashboard, logoutBtn, logForm, logsTableBody, metricsToggle, metricsContent;
+let hourlyRateInput, startRateBtn, stopRateBtn, accumulatedAmount, showInTitleCheckbox;
 
-// Event Listeners
-if (downloadLink) downloadLink.addEventListener('click', handleDownloadClick);
-if (passwordInput) passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') checkPassword();
+// Initialize Secret Features when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Get DOM Elements
+    downloadLink = document.getElementById('downloadLink');
+    clickCounter = document.getElementById('clickCounter');
+    passwordField = document.getElementById('passwordField');
+    passwordInput = document.getElementById('passwordInput');
+    passwordMessage = document.getElementById('passwordMessage');
+    secretDashboard = document.getElementById('secretDashboard');
+    logoutBtn = document.getElementById('logoutBtn');
+    logForm = document.getElementById('logForm');
+    logsTableBody = document.getElementById('logsTableBody');
+    metricsToggle = document.getElementById('metricsToggle');
+    metricsContent = document.getElementById('metricsContent');
+    hourlyRateInput = document.getElementById('hourlyRate');
+    startRateBtn = document.getElementById('startRateBtn');
+    stopRateBtn = document.getElementById('stopRateBtn');
+    accumulatedAmount = document.getElementById('accumulatedAmount');
+    showInTitleCheckbox = document.getElementById('showInTitle');
+
+    // Attach Event Listeners
+    if (downloadLink) downloadLink.addEventListener('click', handleDownloadClick);
+    if (passwordInput) passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkPassword();
+    });
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+    if (logForm) logForm.addEventListener('submit', handleLogSubmit);
+    if (metricsToggle) metricsToggle.addEventListener('click', toggleMetrics);
+    if (startRateBtn) startRateBtn.addEventListener('click', startRateTracker);
+    if (stopRateBtn) stopRateBtn.addEventListener('click', stopRateTracker);
+    if (showInTitleCheckbox) showInTitleCheckbox.addEventListener('change', updateTitle);
+    
+    // Initialize Triple-click Counter on English link
+    initTripleClickCounter();
 });
-if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-if (logForm) logForm.addEventListener('submit', handleLogSubmit);
-if (metricsToggle) metricsToggle.addEventListener('click', toggleMetrics);
-if (startRateBtn) startRateBtn.addEventListener('click', startRateTracker);
-if (stopRateBtn) stopRateBtn.addEventListener('click', stopRateTracker);
-if (showInTitleCheckbox) showInTitleCheckbox.addEventListener('change', updateTitle);
 
 // Download Link Click Handler
 function handleDownloadClick(e) {
@@ -1838,17 +1849,11 @@ let englishClickCount = 0;
 let counterInterval = null;
 let counterStartTime = null;
 let originalTitle = document.title;
-
-// DOM Elements
-const englishLink = document.getElementById('lien-changement-langue');
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    initTripleClickCounter();
-});
+let englishLink = null; // Global reference to the English link element
 
 // Triple-click counter on English link
 function initTripleClickCounter() {
+    englishLink = document.getElementById('lien-changement-langue');
     if (!englishLink) return;
     
     let lastClickTime = 0;
@@ -1879,6 +1884,8 @@ function initTripleClickCounter() {
 
 // Activate the live counter
 function activateCounter() {
+    if (!englishLink) return;
+    
     counterStartTime = Date.now();
 
     englishLink.textContent = '0';
@@ -1896,6 +1903,8 @@ function activateCounter() {
 
 // Deactivate the counter
 function deactivateCounter() {
+    if (!englishLink) return;
+    
     if (counterInterval) {
         clearInterval(counterInterval);
         counterInterval = null;
@@ -1916,7 +1925,7 @@ function deactivateCounter() {
 
 // Update the counter display
 function updateCounter() {
-    if (!counterStartTime) return;
+    if (!counterStartTime || !englishLink) return;
     
     const elapsedSeconds = Math.floor((Date.now() - counterStartTime) / 1000);
     const ratePerSecond = COUNTER_CONFIG.HOURLY_RATE / 3600;
