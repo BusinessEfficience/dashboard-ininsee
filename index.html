@@ -1402,54 +1402,23 @@ static/img/logo-instagram-small.png
 // Environment variables: SUPABASE_URL and SUPABASE_KEY (set in Cloudflare Dashboard)
 // =============================================================================
 
-// Get Supabase URL from response headers (injected by Cloudflare Pages _headers)
+// Get Supabase URL - reads from Worker-injected global variables
 const getSupabaseUrl = function() {
-    // Try to get from custom header first (injected by Cloudflare Pages)
-    const headerUrl = window.document.getElementById('supabase-url-placeholder');
-    if (headerUrl) {
-        const textContent = headerUrl.textContent.trim();
-        if (textContent && textContent !== 'https://your-project.supabase.co') {
-            return textContent;
-        }
+    // Priority 1: Read from Worker-injected global variables
+    if (typeof window.PUBLIC_SUPABASE_URL !== 'undefined' && window.PUBLIC_SUPABASE_URL) {
+        return window.PUBLIC_SUPABASE_URL;
     }
-    // Fallback: check for header injection via Cloudflare Pages
-    try {
-        const responseUrl = window.getComputedStyle(document.body).getPropertyValue('--supabase-url');
-        if (responseUrl && responseUrl.trim() && responseUrl.trim() !== 'https://your-project.supabase.co') {
-            return responseUrl.trim();
-        }
-    } catch (e) {}
-    // Fallback: check meta tag if exists
-    const metaUrl = document.querySelector('meta[name="supabase-url"]');
-    if (metaUrl) {
-        const content = metaUrl.getAttribute('content');
-        if (content && content.trim()) {
-            return content.trim();
-        }
-    }
-    // Default placeholder - must be replaced via _headers file
+    // Priority 2: Check for placeholders or invalid values
     return 'https://your-project.supabase.co';
 };
 
-// Get Supabase anon key from response headers (injected by Cloudflare Pages _headers)
+// Get Supabase anon key - reads from Worker-injected global variables
 const getSupabaseKey = function() {
-    // Try to get from custom header first (injected by Cloudflare Pages)
-    const headerKey = window.document.getElementById('supabase-key-placeholder');
-    if (headerKey) {
-        const textContent = headerKey.textContent.trim();
-        if (textContent && textContent !== 'your-anon-key') {
-            return textContent;
-        }
+    // Priority 1: Read from Worker-injected global variables
+    if (typeof window.PUBLIC_SUPABASE_ANON_KEY !== 'undefined' && window.PUBLIC_SUPABASE_ANON_KEY) {
+        return window.PUBLIC_SUPABASE_ANON_KEY;
     }
-    // Fallback: check meta tag if exists
-    const metaKey = document.querySelector('meta[name="supabase-key"]');
-    if (metaKey) {
-        const content = metaKey.getAttribute('content');
-        if (content && content.trim()) {
-            return content.trim();
-        }
-    }
-    // Default placeholder - must be replaced via _headers file
+    // Priority 2: Check for placeholders or invalid values
     return 'your-anon-key';
 };
 
