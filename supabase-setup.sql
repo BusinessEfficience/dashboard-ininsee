@@ -17,9 +17,15 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- =============================================================================
+-- Drop existing tables (if re-running script)
+-- =============================================================================
+DROP TABLE IF EXISTS logs CASCADE;
+DROP TABLE IF EXISTS metrics CASCADE;
+
+-- =============================================================================
 -- Create logs table with enhanced schema
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS logs (
+CREATE TABLE logs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at timestamptz DEFAULT now(),
     updated_at timestamptz DEFAULT now(),
@@ -36,10 +42,10 @@ CREATE TABLE IF NOT EXISTS logs (
 -- =============================================================================
 -- Create indexes for performance optimization
 -- =============================================================================
-CREATE INDEX IF NOT EXISTS idx_logs_created_at ON logs(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_logs_user_id ON logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_logs_date ON logs(log_date DESC);
-CREATE INDEX IF NOT EXISTS idx_logs_score ON logs(score DESC);
+CREATE INDEX idx_logs_created_at ON logs(created_at DESC);
+CREATE INDEX idx_logs_user_id ON logs(user_id);
+CREATE INDEX idx_logs_date ON logs(log_date DESC);
+CREATE INDEX idx_logs_score ON logs(score DESC);
 
 -- =============================================================================
 -- Enable Row Level Security (RLS) on logs table
@@ -49,30 +55,22 @@ ALTER TABLE logs ENABLE ROW LEVEL SECURITY;
 -- =============================================================================
 -- RLS Policies for logs table
 -- =============================================================================
--- Allow public read access (read-only operations are safe)
-CREATE POLICY IF NOT EXISTS "Allow public read" ON logs
-    FOR SELECT
-    USING (true);
+-- Allow public read access
+CREATE POLICY "Allow public read" ON logs FOR SELECT USING (true);
 
--- Allow public insert access (controlled by application logic)
-CREATE POLICY IF NOT EXISTS "Allow public insert" ON logs
-    FOR INSERT
-    WITH CHECK (true);
+-- Allow public insert access
+CREATE POLICY "Allow public insert" ON logs FOR INSERT WITH CHECK (true);
 
--- Allow public delete access (controlled by application logic)
-CREATE POLICY IF NOT EXISTS "Allow public delete" ON logs
-    FOR DELETE
-    USING (true);
+-- Allow public delete access
+CREATE POLICY "Allow public delete" ON logs FOR DELETE USING (true);
 
--- Allow public update access (controlled by application logic)
-CREATE POLICY IF NOT EXISTS "Allow public update" ON logs
-    FOR UPDATE
-    USING (true);
+-- Allow public update access
+CREATE POLICY "Allow public update" ON logs FOR UPDATE USING (true);
 
 -- =============================================================================
 -- Create metrics table for dashboard aggregations
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS metrics (
+CREATE TABLE metrics (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at timestamptz DEFAULT now(),
     updated_at timestamptz DEFAULT now(),
@@ -99,27 +97,20 @@ ON CONFLICT (id) DO NOTHING;
 -- =============================================================================
 ALTER TABLE metrics ENABLE ROW LEVEL SECURITY;
 
--- =============================================================================
--- RLS Policies for metrics table
--- =============================================================================
--- Allow public read access (aggregated data is safe to share)
-CREATE POLICY IF NOT EXISTS "Allow public read" ON metrics
-    FOR SELECT
-    USING (true);
+-- Allow public read access
+CREATE POLICY "Allow public read metrics" ON metrics FOR SELECT USING (true);
 
--- Service role only for modifications (prevents client-side updates)
-CREATE POLICY IF NOT EXISTS "Service role only" ON metrics
-    FOR ALL
-    USING (false)
-    WITH CHECK (false);
+-- Service role only (no public access)
+CREATE POLICY "Service role only metrics" ON metrics FOR ALL USING (false) WITH CHECK (false);
 
 -- =============================================================================
 -- Create auto-update function for metrics
 -- =============================================================================
+DROP FUNCTION IF EXISTS update_metrics();
+
 CREATE OR REPLACE FUNCTION update_metrics()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Update weekly metrics (last 7 days)
     UPDATE metrics SET
         weekly_entries = (SELECT COUNT(*) FROM logs WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'),
         weekly_avg_score = (SELECT AVG(score) FROM logs WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'),
@@ -127,7 +118,6 @@ BEGIN
         updated_at = now()
         WHERE id = '00000000-0000-0000-0000-000000000001';
     
-    -- Update daily metrics (current day only)
     UPDATE metrics SET
         daily_entries = (SELECT COUNT(*) FROM logs WHERE DATE(created_at) = CURRENT_DATE),
         daily_avg_score = (SELECT AVG(score) FROM logs WHERE DATE(created_at) = CURRENT_DATE),
@@ -135,7 +125,6 @@ BEGIN
         updated_at = now()
         WHERE id = '00000000-0000-0000-0000-000000000001';
     
-    -- Update overall statistics
     UPDATE metrics SET
         total_entries = (SELECT COUNT(*) FROM logs),
         overall_avg_score = (SELECT AVG(score) FROM logs),
@@ -151,14 +140,15 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Create trigger for auto-update on log insert
 -- =============================================================================
 DROP TRIGGER IF EXISTS on_log_insert ON logs;
+
 CREATE TRIGGER on_log_insert
     AFTER INSERT ON logs
     FOR EACH ROW
     EXECUTE FUNCTION update_metrics();
 
 -- =============================================================================
--- Verification queries (optional - run in SQL Editor to verify setup)
+-- Verification queries (run these to check setup)
 -- =============================================================================
--- SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('logs', 'metrics');
--- SELECT * FROM pg_policies WHERE tablename IN ('logs', 'metrics');
--- =============================================================================
+-- SELECT * FROM logs LIMIT 5;
+-- SELECT * FROM metrics;
+-- SELECT * FROM pg_policies WHERE tablename = 'logs';
