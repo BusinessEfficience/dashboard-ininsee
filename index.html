@@ -1396,37 +1396,60 @@ static/img/logo-instagram-small.png
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // =============================================================================
-// SUPABASE CONFIGURATION - SECURE
+// SUPABASE CONFIGURATION - CLOUDFLARE PAGES COMPATIBLE
 // =============================================================================
-// Credentials are loaded from environment variables at build time
-// NEVER hardcode credentials in source code
+// Credentials are read from custom headers injected by Cloudflare Pages _headers file
+// Environment variables: SUPABASE_URL and SUPABASE_KEY (set in Cloudflare Dashboard)
 // =============================================================================
 
-// Get Supabase URL from environment variable or use placeholder
+// Get Supabase URL from response headers (injected by Cloudflare Pages _headers)
 const getSupabaseUrl = function() {
-    // Check for environment variable (Cloudflare Pages, Vercel, Netlify)
-    if (typeof importMetaEnv !== 'undefined' && importMetaEnv.PUBLIC_SUPABASE_URL) {
-        return importMetaEnv.PUBLIC_SUPABASE_URL;
+    // Try to get from custom header first (injected by Cloudflare Pages)
+    const headerUrl = window.document.getElementById('supabase-url-placeholder');
+    if (headerUrl) {
+        const textContent = headerUrl.textContent.trim();
+        if (textContent && textContent !== 'https://your-project.supabase.co') {
+            return textContent;
+        }
     }
-    // Check for global variable (set by deployment platform)
-    if (typeof PUBLIC_SUPABASE_URL !== 'undefined') {
-        return PUBLIC_SUPABASE_URL;
+    // Fallback: check for header injection via Cloudflare Pages
+    try {
+        const responseUrl = window.getComputedStyle(document.body).getPropertyValue('--supabase-url');
+        if (responseUrl && responseUrl.trim() && responseUrl.trim() !== 'https://your-project.supabase.co') {
+            return responseUrl.trim();
+        }
+    } catch (e) {}
+    // Fallback: check meta tag if exists
+    const metaUrl = document.querySelector('meta[name="supabase-url"]');
+    if (metaUrl) {
+        const content = metaUrl.getAttribute('content');
+        if (content && content.trim()) {
+            return content.trim();
+        }
     }
-    // Default placeholder - must be replaced via environment variable
+    // Default placeholder - must be replaced via _headers file
     return 'https://your-project.supabase.co';
 };
 
-// Get Supabase anon key from environment variable or use placeholder
+// Get Supabase anon key from response headers (injected by Cloudflare Pages _headers)
 const getSupabaseKey = function() {
-    // Check for environment variable (Cloudflare Pages, Vercel, Netlify)
-    if (typeof importMetaEnv !== 'undefined' && importMetaEnv.PUBLIC_SUPABASE_ANON_KEY) {
-        return importMetaEnv.PUBLIC_SUPABASE_ANON_KEY;
+    // Try to get from custom header first (injected by Cloudflare Pages)
+    const headerKey = window.document.getElementById('supabase-key-placeholder');
+    if (headerKey) {
+        const textContent = headerKey.textContent.trim();
+        if (textContent && textContent !== 'your-anon-key') {
+            return textContent;
+        }
     }
-    // Check for global variable (set by deployment platform)
-    if (typeof PUBLIC_SUPABASE_ANON_KEY !== 'undefined') {
-        return PUBLIC_SUPABASE_ANON_KEY;
+    // Fallback: check meta tag if exists
+    const metaKey = document.querySelector('meta[name="supabase-key"]');
+    if (metaKey) {
+        const content = metaKey.getAttribute('content');
+        if (content && content.trim()) {
+            return content.trim();
+        }
     }
-    // Default placeholder - must be replaced via environment variable
+    // Default placeholder - must be replaced via _headers file
     return 'your-anon-key';
 };
 
@@ -1518,7 +1541,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Attach Event Listeners
     if (downloadLink) downloadLink.addEventListener('click', handleDownloadClick);
     if (passwordInput) passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkPassword();
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkPassword();
+        }
     });
     if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
     if (logForm) logForm.addEventListener('submit', handleLogSubmit);
