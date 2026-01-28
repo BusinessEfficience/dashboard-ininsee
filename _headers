@@ -1,11 +1,11 @@
 # Cloudflare Pages Headers for Supabase Configuration
 # These headers inject Supabase credentials at runtime
-# Environment variables are set in Cloudflare Dashboard → Pages → Settings → Environment Variables
+# Environment variables: PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY (set in Cloudflare Dashboard)
 
 /index.html
-  X-Supabase-Url: ${SUPABASE_URL}
-  X-Supabase-Key: ${SUPABASE_KEY}
+  X-Supabase-Url: ${PUBLIC_SUPABASE_URL}
+  X-Supabase-Key: ${PUBLIC_SUPABASE_ANON_KEY}
 
 /static/*
-  X-Supabase-Url: ${SUPABASE_URL}
-  X-Supabase-Key: ${SUPABASE_KEY}
+  X-Supabase-Url: ${PUBLIC_SUPABASE_URL}
+  X-Supabase-Key: ${PUBLIC_SUPABASE_ANON_KEY}
