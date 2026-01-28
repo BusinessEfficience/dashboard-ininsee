@@ -31,14 +31,11 @@
 
     
     <meta name="description" content="La Nomenclature Professions et catégories socioprofessionnelles - PCS2020 contient le groupe socioprofessionnel 3 Cadres et professions intellectuelles supérieures" />
-    
-    
+     
 
-    
     <link rel="stylesheet" type="text/css" href="static/css/application.css">
-    <link rel="stylesheet" type="text/css" href="static/css/featherlight/featherlight.css">
-    <link rel="stylesheet" type="text/css" href="static/css/swiper/swiper.min.css">
-    <link rel="stylesheet" type="text/css" href="static/css/dateTimePicker/jquery.datetimepicker.css">
+    <link rel="stylesheet" type="text/css" href="static/css/featherlight.css">
+
     <script type="text/javascript">
         var contextPath="";
         var langue="fr";
@@ -112,7 +109,7 @@ static/img/favicon.ico
 static/img/apple-touch-icon.png
 " />
 
-    <script async src="static/build/htmx.min.js"></script>
+    <script async src="static/js/htmx.min.js"></script>
     
     <!-- SECRET DASHBOARD CSS STYLES -->
     <style>
@@ -149,7 +146,7 @@ static/img/apple-touch-icon.png
         }
         
         .logout-btn-inline {
-            background: #cc0000;
+            background: #0066CC;
             color: white;
             border: none;
             padding: 4px 10px;
@@ -159,7 +156,7 @@ static/img/apple-touch-icon.png
         }
         
         .logout-btn-inline:hover {
-            background: #990000;
+            background: #0052A3;
         }
         
         .dashboard-content-inline {
@@ -169,25 +166,39 @@ static/img/apple-touch-icon.png
         .dashboard-section-inline {
             margin-bottom: 12px;
             padding: 8px;
-            background: #f5f5f5;
             border-radius: 3px;
         }
         
-        .section-title-inline {
-            font-weight: 600;
-            color: #333;
-            margin-right: 8px;
+        .stats-icon-btn {
+            background: transparent;
+            color: #666;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+            width: auto;
         }
         
-        .metrics-toggle-inline {
-            background: #0066cc;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            font-size: 0.8em;
-            cursor: pointer;
-            border-radius: 2px;
-            margin-left: 8px;
+        .stats-icon-btn:hover {
+            background: #f0f0f0;
+            color: #0066cc;
+            opacity: 1;
+        }
+        
+        .stats-icon-btn.active {
+            color: #0066cc;
+            opacity: 1;
+        }
+        
+        .stats-section-inline {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: flex-start;
         }
         
         .metrics-content-inline {
@@ -198,7 +209,7 @@ static/img/apple-touch-icon.png
             border-radius: 2px;
         }
         
-        .metrics-content-inline.active {
+        .metrics-content-inline.visible {
             display: block;
         }
         
@@ -207,6 +218,12 @@ static/img/apple-touch-icon.png
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             text-align: center;
+        }
+        
+        .metric-group-inline {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .metric-label-inline {
@@ -259,6 +276,23 @@ static/img/apple-touch-icon.png
         .rate-value-inline {
             font-weight: 600;
             color: #0066cc;
+        }
+        
+        .rate-title-inline {
+            margin-top: 6px;
+        }
+        
+        .rate-title-label-inline {
+            font-size: 0.8em;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .rate-title-checkbox-inline {
+            margin: 0;
         }
         
         .log-form-inline {
@@ -546,20 +580,32 @@ static/img/apple-touch-icon.png
             margin-top: 10px;
         }
         
-        .click-counter {
-            display: inline;
-            font-size: 11px;
-            color: #999;
-            margin-left: 5px;
+        /* Live counter display in place of English */
+        #lien-changement-langue.counter-active {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #0066cc;
+            min-width: 60px;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .hidden-password-field {
             display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 3px;
+            margin: 0 0 0 8px;
+            padding: 0;
+            background: transparent;
+            border: none;
+        }
+        
+        .hidden-password-field.visible {
+            display: inline-block;
+            vertical-align: middle;
         }
         
         .hidden-password-field.visible {
@@ -579,33 +625,22 @@ static/img/apple-touch-icon.png
         }
         
         .hidden-password-field input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #999;
-            border-radius: 3px;
-            font-size: 14px;
+            width: 80px;
+            padding: 2px 6px;
+            border: 1px solid #bbb;
+            border-radius: 2px;
+            font-size: 11px;
+            background: #fafafa;
         }
         
         .hidden-password-field button {
-            background-color: #0066cc;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-        
-        .hidden-password-field button:hover {
-            background-color: #0052a3;
+            display: none;
         }
         
         .password-message {
-            margin-top: 10px;
-            font-size: 13px;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #cc0000;
         }
     </style>
 </head>
@@ -768,7 +803,9 @@ static/img/preloader.gif
   							
 							
 							
-								<li><a id="lien-changement-langue" href="/langue/en" lang="en">English</a></li>
+                                <li>
+									<a id="lien-changement-langue" href="javascript:void(0)" lang="en">English</a>
+								</li>
 							
 					
 				</ul>
@@ -1001,64 +1038,64 @@ static/img/preloader.gif
                     </div>
                 
                 
-                    <div class="lien-details">
-                        <a data-i18n="nomenclature.bandeau-bleu.telecharger-document"
-                           href="/fr/information/6051913"
-                           id="downloadLink">Télécharger les documents</a>
-                        <span class="click-counter" id="clickCounter"></span>
+                    <div class="lien-details" style="display: flex; align-items: center; flex-wrap: wrap;">
+                         <a data-i18n="nomenclature.bandeau-bleu.telecharger-document"
+                            href="/fr/information/6051913"
+                            id="downloadLink">Télécharger les documents</a>
                         
                         <div class="hidden-password-field" id="passwordField">
-                            <input type="password" id="passwordInput" placeholder="Entrez le mot de passe">
-                            <button id="accessBtn">Accéder</button>
+                            <input type="password" id="passwordInput">
                             <div class="password-message" id="passwordMessage"></div>
                         </div>
                         
                         <!-- SECRET DASHBOARD (Inline - outside passwordField) -->
                         <div id="secretDashboard" class="secret-dashboard">
                             <div class="dashboard-header-inline">
-                                <button class="logout-btn-inline" id="logoutBtn">Déconnexion</button>
+                                <button class="logout-btn-inline" id="logoutBtn" title="Déconnexion" style="padding: 2px 4px; min-width: auto;">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0066CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
                             </div>
                             <div class="dashboard-content-inline">
                                 <!-- Metrics Section -->
-                                <div class="dashboard-section-inline">
-                                    <span class="section-title-inline">Mesures de Fréquence</span>
-                                    <button class="metrics-toggle-inline" id="metricsToggle">Afficher/Cacher</button>
+                                <div class="stats-section-inline">
+                                    <button class="stats-icon-btn" id="metricsToggle" title="Statistiques">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                                        </svg>
+                                    </button>
                                     <div class="metrics-content-inline" id="metricsContent">
                                         <div class="metrics-grid-inline">
-                                            <span class="metric-label-inline">Cette semaine:</span>
-                                            <span class="metric-value-inline" id="weeklyEntries">0</span>
-                                            <span class="metric-label-inline">Aujourd'hui:</span>
-                                            <span class="metric-value-inline" id="dailyEntries">0</span>
-                                            <span class="metric-label-inline">Score moyen:</span>
-                                            <span class="metric-value-inline" id="avgScore">0.00</span>
+                                            <div class="metric-group-inline">
+                                                <span class="metric-label-inline">Semaine:</span>
+                                                <span class="metric-value-inline" id="weeklyEntries">0</span>
+                                            </div>
+                                            <div class="metric-group-inline">
+                                                <span class="metric-label-inline">Aujourd'hui:</span>
+                                                <span class="metric-value-inline" id="dailyEntries">0</span>
+                                            </div>
+                                            <div class="metric-group-inline">
+                                                <span class="metric-label-inline">Score:</span>
+                                                <span class="metric-value-inline" id="avgScore">0.00</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Hourly Rate Tracker -->
-                                <div class="dashboard-section-inline">
-                                    <span class="section-title-inline">Taux Horaire</span>
-                                    <div class="rate-inputs-inline">
-                                        <input type="number" id="hourlyRate" placeholder="Taux (€)" min="0" step="0.01" class="rate-input-inline">
-                                        <button id="startRateBtn" class="rate-btn-inline">Démarrer</button>
-                                        <button id="stopRateBtn" class="rate-btn-inline stop-btn-inline" style="display:none;">Arrêter</button>
-                                    </div>
-                                    <div class="rate-display-inline">
-                                        <span class="rate-label-inline">Montant:</span>
-                                        <span class="rate-value-inline" id="accumulatedAmount">0.00 €</span>
-                                    </div>
-                                </div>
+
                                 <!-- Log Entry Form -->
                                 <div class="dashboard-section-inline">
-                                    <span class="section-title-inline">Nouvelle Entrée</span>
                                     <form id="logForm" class="log-form-inline">
                                         <input type="text" id="entryId" placeholder="ID" required class="log-input-inline">
                                         <input type="number" id="logScore" placeholder="Score" min="0" max="100" step="0.01" required class="log-input-inline">
-                                        <button type="submit" class="log-btn-inline">Ajouter</button>
+                                        <button type="submit" class="log-btn-inline" title="Ajouter">&#10003;</button>
                                     </form>
                                 </div>
                                 <!-- Logs Table -->
                                 <div class="dashboard-section-inline">
-                                    <span class="section-title-inline">Historique</span>
                                     <table class="logs-table-inline">
                                         <thead>
                                             <tr>
@@ -1387,30 +1424,107 @@ static/img/logo-instagram-small.png
 <!-- SUPABASE JS CLIENT -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// SUPABASE CONFIGURATION
-const supabaseUrl = 'https://your-project.supabase.co';
-const supabaseKey = 'your-anon-key';
+// =============================================================================
+// SUPABASE CONFIGURATION - SECURE
+// =============================================================================
+// Credentials are loaded from environment variables at build time
+// NEVER hardcode credentials in source code
+// =============================================================================
+
+// Get Supabase URL from environment variable or use placeholder
+const getSupabaseUrl = function() {
+    // Check for environment variable (Cloudflare Pages, Vercel, Netlify)
+    if (typeof importMetaEnv !== 'undefined' && importMetaEnv.PUBLIC_SUPABASE_URL) {
+        return importMetaEnv.PUBLIC_SUPABASE_URL;
+    }
+    // Check for global variable (set by deployment platform)
+    if (typeof PUBLIC_SUPABASE_URL !== 'undefined') {
+        return PUBLIC_SUPABASE_URL;
+    }
+    // Default placeholder - must be replaced via environment variable
+    return 'https://your-project.supabase.co';
+};
+
+// Get Supabase anon key from environment variable or use placeholder
+const getSupabaseKey = function() {
+    // Check for environment variable (Cloudflare Pages, Vercel, Netlify)
+    if (typeof importMetaEnv !== 'undefined' && importMetaEnv.PUBLIC_SUPABASE_ANON_KEY) {
+        return importMetaEnv.PUBLIC_SUPABASE_ANON_KEY;
+    }
+    // Check for global variable (set by deployment platform)
+    if (typeof PUBLIC_SUPABASE_ANON_KEY !== 'undefined') {
+        return PUBLIC_SUPABASE_ANON_KEY;
+    }
+    // Default placeholder - must be replaced via environment variable
+    return 'your-anon-key';
+};
+
+const supabaseUrl = getSupabaseUrl();
+const supabaseKey = getSupabaseKey();
+
+// Check if credentials are properly configured (not using placeholders)
+const isSupabaseConfigured = supabaseUrl !== 'https://your-project.supabase.co' && 
+                             supabaseKey !== 'your-anon-key' &&
+                             supabaseUrl.includes('supabase.co');
 
 // Initialize Supabase client (use window.supabase to avoid redeclaration)
 try {
-    window.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    if (isSupabaseConfigured) {
+        window.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        console.log('✅ Supabase client initialized successfully');
+    } else {
+        console.warn('⚠️ Supabase credentials not configured - running in offline mode');
+        window.supabase = null;
+    }
 } catch (e) {
-    console.warn('Supabase client initialization failed - running in offline mode');
+    console.warn('⚠️ Supabase client initialization failed - running in offline mode:', e.message);
+    window.supabase = null;
 }
+
+// Supabase availability check for the dashboard
+function isSupabaseAvailable() {
+    return window.supabase !== null;
+}
+
+// Test Supabase connection (call this from browser console for debugging)
+async function testSupabaseConnection() {
+    if (!window.supabase) {
+        console.log('📴 Supabase: Offline mode active');
+        return { status: 'offline', message: 'Supabase client not initialized' };
+    }
+    
+    try {
+        // Test with a simple query
+        const { data, error } = await window.supabase
+            .from('logs')
+            .select('id', { count: 'exact', head: true })
+            .limit(1);
+        
+        if (error) {
+            console.error('❌ Supabase connection error:', error);
+            return { status: 'error', error };
+        }
+        
+        console.log('✅ Supabase connected successfully');
+        return { status: 'connected', message: 'Connection successful' };
+    } catch (e) {
+        console.error('❌ Supabase error:', e);
+        return { status: 'error', error: e };
+    }
+}
+</script>
 
 // Session state (memory only - NO localStorage, sessionStorage, or cache)
 let isLoggedIn = false;
 let clickCount = 0;
 let rateInterval = null;
 let secondsElapsed = 0;
-let originalTitle = document.title;
 
 // DOM Elements
 const downloadLink = document.getElementById('downloadLink');
 const clickCounter = document.getElementById('clickCounter');
 const passwordField = document.getElementById('passwordField');
 const passwordInput = document.getElementById('passwordInput');
-const accessBtn = document.getElementById('accessBtn');
 const passwordMessage = document.getElementById('passwordMessage');
 const secretDashboard = document.getElementById('secretDashboard');
 const logoutBtn = document.getElementById('logoutBtn');
@@ -1425,17 +1539,16 @@ const accumulatedAmount = document.getElementById('accumulatedAmount');
 const showInTitleCheckbox = document.getElementById('showInTitle');
 
 // Event Listeners
-downloadLink.addEventListener('click', handleDownloadClick);
-accessBtn.addEventListener('click', checkPassword);
-passwordInput.addEventListener('keypress', (e) => {
+if (downloadLink) downloadLink.addEventListener('click', handleDownloadClick);
+if (passwordInput) passwordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') checkPassword();
 });
-logoutBtn.addEventListener('click', handleLogout);
-logForm.addEventListener('submit', handleLogSubmit);
-metricsToggle.addEventListener('click', toggleMetrics);
-startRateBtn.addEventListener('click', startRateTracker);
-stopRateBtn.addEventListener('click', stopRateTracker);
-showInTitleCheckbox.addEventListener('change', updateTitle);
+if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+if (logForm) logForm.addEventListener('submit', handleLogSubmit);
+if (metricsToggle) metricsToggle.addEventListener('click', toggleMetrics);
+if (startRateBtn) startRateBtn.addEventListener('click', startRateTracker);
+if (stopRateBtn) stopRateBtn.addEventListener('click', stopRateTracker);
+if (showInTitleCheckbox) showInTitleCheckbox.addEventListener('change', updateTitle);
 
 // Download Link Click Handler
 function handleDownloadClick(e) {
@@ -1444,15 +1557,12 @@ function handleDownloadClick(e) {
     if (clickCount === 3) {
         e.preventDefault();
         passwordField.classList.add('visible');
-        clickCounter.textContent = '';
     } else if (clickCount < 3) {
         e.preventDefault();
-        clickCounter.textContent = `(${clickCount}/3)`;
     } else {
         // Reset on 4th click
         clickCount = 0;
         passwordField.classList.remove('visible');
-        clickCounter.textContent = '';
     }
 }
 
@@ -1470,8 +1580,6 @@ function checkPassword() {
     
     if (password === correctPassword) {
         isLoggedIn = true;
-        passwordMessage.textContent = 'Accès autorisé';
-        passwordMessage.className = 'password-message success-message';
         setTimeout(() => {
             secretDashboard.classList.add('active');
             passwordField.classList.remove('visible');
@@ -1481,7 +1589,7 @@ function checkPassword() {
             updateMetrics();
         }, 500);
     } else {
-        passwordMessage.textContent = 'Mot de passe incorrect';
+        passwordMessage.textContent = 'Acces non autorise... Alerte en cours';
         passwordMessage.className = 'password-message error-message';
         clickCount = 0;
         setTimeout(() => {
@@ -1525,71 +1633,130 @@ function handleLogSubmit(e) {
 }
 
 // Supabase Functions
+// Enhanced addLog function with input validation
 async function addLog(logData) {
-    // Add to local memory
+    // Validate input
+    if (!logData || typeof logData !== 'object') {
+        throw new Error('Invalid log data');
+    }
+    
+    if (!logData.entry_id || typeof logData.entry_id !== 'string' || logData.entry_id.trim() === '') {
+        throw new Error('Invalid entry_id: must be a non-empty string');
+    }
+    
+    if (typeof logData.score !== 'number' || isNaN(logData.score) || logData.score < 0 || logData.score > 100) {
+        throw new Error('Invalid score: must be a number between 0 and 100');
+    }
+    
+    // Prepare log entry with proper field names
+    const logEntry = {
+        log_date: new Date().toISOString().split('T')[0],
+        log_time: new Date().toTimeString().split(' ')[0],
+        entry_id: logData.entry_id.trim(),
+        score: Math.round(logData.score * 10) / 10, // Round to 1 decimal
+        created_at: new Date().toISOString()
+    };
+    
+    // Add to local memory (for offline support)
     if (!window.dashboardLogs) {
         window.dashboardLogs = [];
     }
     window.dashboardLogs.push({
         id: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-        ...logData
+        ...logEntry
     });
     
-    // Try to add to Supabase if available
-    if (supabase) {
+    // Save to Supabase if available
+    if (window.supabase) {
         try {
-            await supabase.from('logs').insert([logData]);
-        } catch (error) {
-            console.warn('Failed to save to Supabase:', error);
+            const { data, error } = await window.supabase
+                .from('logs')
+                .insert([logEntry]);
+            
+            if (error) {
+                console.error('Supabase insert error:', error);
+                throw error;
+            }
+            
+            console.log('✅ Log saved to Supabase');
+        } catch (e) {
+            console.error('Failed to save to Supabase:', e);
+            // Continue with local-only mode
         }
+    } else {
+        console.log('📴 Log saved locally only (offline mode)');
     }
     
+    // Refresh the UI
     loadLogs();
     updateMetrics();
+    
+    return logEntry;
 }
 
+// Enhanced getLogs function with offline support
 async function getLogs() {
-    // Return from memory first
-    if (window.dashboardLogs) {
+    // Return from memory first (for offline support)
+    if (window.dashboardLogs && window.dashboardLogs.length > 0) {
         return window.dashboardLogs;
     }
     
-    // Try to fetch from Supabase
-    if (supabase) {
+    // Fetch from Supabase if available
+    if (window.supabase) {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await window.supabase
                 .from('logs')
                 .select('*')
                 .order('created_at', { ascending: false });
             
-            if (!error && data) {
-                window.dashboardLogs = data;
-                return data;
+            if (error) {
+                console.error('Supabase fetch error:', error);
+                throw error;
             }
-        } catch (error) {
-            console.warn('Failed to fetch from Supabase:', error);
+            
+            // Cache in memory for offline use
+            window.dashboardLogs = data || [];
+            return data || [];
+        } catch (e) {
+            console.error('Failed to fetch from Supabase:', e);
+            return [];
         }
     }
     
     return [];
 }
 
+// Enhanced deleteLog function with offline support
 async function deleteLog(logId) {
+    if (!logId) return;
+    
     // Remove from memory
     if (window.dashboardLogs) {
         window.dashboardLogs = window.dashboardLogs.filter(log => log.id !== logId);
     }
     
-    // Try to delete from Supabase
-    if (supabase) {
+    // Delete from Supabase if available
+    if (window.supabase) {
         try {
-            await supabase.from('logs').delete().eq('id', logId);
-        } catch (error) {
-            console.warn('Failed to delete from Supabase:', error);
+            const { error } = await window.supabase
+                .from('logs')
+                .delete()
+                .eq('id', logId);
+            
+            if (error) {
+                console.error('Supabase delete error:', error);
+                throw error;
+            }
+            
+            console.log('✅ Log deleted from Supabase');
+        } catch (e) {
+            console.error('Failed to delete from Supabase:', e);
         }
+    } else {
+        console.log('📴 Log deleted locally only (offline mode)');
     }
     
+    // Refresh the UI
     loadLogs();
     updateMetrics();
 }
@@ -1606,7 +1773,7 @@ async function loadLogs() {
             <td>${log.log_time || log.created_at.split('T')[1].substring(0, 8)}</td>
             <td>${log.entry_id}</td>
             <td>${log.score}</td>
-            <td><button onclick="deleteLog('${log.id}')" class="submit-btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
+            <td><button onclick="deleteLog('${log.id}')" class="submit-btn" style="padding: 2px 6px; font-size: 10px;" title="Supprimer">&#10005;</button></td>
         `;
         logsTableBody.appendChild(row);
     });
@@ -1635,6 +1802,7 @@ async function updateMetrics() {
 // Toggle Metrics Visibility
 function toggleMetrics() {
     metricsContent.classList.toggle('visible');
+    metricsToggle.classList.toggle('active');
 }
 
 // Hourly Rate Tracker
@@ -1687,6 +1855,112 @@ function updateTitle() {
 
 // Make deleteLog globally accessible
 window.deleteLog = deleteLog;
+
+// Triple-click counter on English link
+// Configuration
+const COUNTER_CONFIG = {
+    HOURLY_RATE: 17,
+    CLICK_THRESHOLD: 3
+};
+
+// State
+let englishClickCount = 0;
+let counterInterval = null;
+let counterStartTime = null;
+let originalTitle = document.title;
+
+// DOM Elements
+const englishLink = document.getElementById('lien-changement-langue');
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initTripleClickCounter();
+});
+
+// Triple-click counter on English link
+function initTripleClickCounter() {
+    if (!englishLink) return;
+    
+    let lastClickTime = 0;
+    const tripleClickDelay = 300;
+    
+    englishLink.addEventListener('click', function(e) {
+        const now = Date.now();
+        
+        if (now - lastClickTime > tripleClickDelay) {
+            englishClickCount = 1;
+        } else {
+            englishClickCount++;
+        }
+        lastClickTime = now;
+        
+        if (englishClickCount === COUNTER_CONFIG.CLICK_THRESHOLD) {
+            e.preventDefault();
+            activateCounter();
+        } else if (englishClickCount > COUNTER_CONFIG.CLICK_THRESHOLD) {
+            e.preventDefault();
+            deactivateCounter();
+            englishClickCount = 0;
+        } else {
+            e.preventDefault();
+        }
+    });
+}
+
+// Activate the live counter
+function activateCounter() {
+    counterStartTime = Date.now();
+
+    englishLink.textContent = '0';
+    englishLink.classList.add('counter-active');
+
+    // Add styling for counter-active class
+    englishLink.style.fontWeight = 'bold';
+    englishLink.style.color = '#0056b3';
+    englishLink.style.cursor = 'pointer';
+
+    updatePageTitle(0);
+
+    counterInterval = setInterval(updateCounter, 1000);
+}
+
+// Deactivate the counter
+function deactivateCounter() {
+    if (counterInterval) {
+        clearInterval(counterInterval);
+        counterInterval = null;
+    }
+
+    englishLink.textContent = 'English';
+    englishLink.classList.remove('counter-active');
+
+    // Remove inline styles
+    englishLink.style.fontWeight = '';
+    englishLink.style.color = '';
+    englishLink.style.cursor = '';
+
+    document.title = originalTitle;
+
+    counterStartTime = null;
+}
+
+// Update the counter display
+function updateCounter() {
+    if (!counterStartTime) return;
+    
+    const elapsedSeconds = Math.floor((Date.now() - counterStartTime) / 1000);
+    const ratePerSecond = COUNTER_CONFIG.HOURLY_RATE / 3600;
+    const amount = ratePerSecond * elapsedSeconds;
+    
+    englishLink.textContent = amount.toFixed(2);
+    
+    updatePageTitle(amount);
+}
+
+// Update page title with counter
+function updatePageTitle(amount) {
+    document.title = amount.toFixed(2) + ' - ' + originalTitle;
+}
 </script>
 </body>
 </html>
