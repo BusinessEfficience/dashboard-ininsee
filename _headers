@@ -3,8 +3,8 @@
 # Environment variables: PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY (set in Cloudflare Dashboard)
 
 /index.html
-  Set-Cookie: SUPABASE_URL=${PUBLIC_SUPABASE_URL}; Path=/; HttpOnly; SameSite=Lax
-  Set-Cookie: SUPABASE_KEY=${PUBLIC_SUPABASE_ANON_KEY}; Path=/; HttpOnly; SameSite=Lax
+  Set-Cookie: SUPABASE_URL=${PUBLIC_SUPABASE_URL}; Path=/; SameSite=Lax
+  Set-Cookie: SUPABASE_KEY=${PUBLIC_SUPABASE_ANON_KEY}; Path=/; SameSite=Lax
 
 /*
   Cache-Control: public, max-age=0, must-revalidate

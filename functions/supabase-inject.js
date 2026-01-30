@@ -3,7 +3,7 @@
 // Environment variables: PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY (set in Pages Settings)
 
 export async function onRequest(context) {
-  const response = context.next();
+  const response = await context.next();
   
   // Only process HTML responses
   const contentType = response.headers.get('content-type') || '';
