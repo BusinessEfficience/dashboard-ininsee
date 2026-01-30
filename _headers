@@ -1,11 +1,10 @@
-# Cloudflare Pages Headers for Supabase Configuration
-# These headers inject Supabase credentials at runtime
-# Environment variables: PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY (set in Cloudflare Dashboard)
+# Cloudflare Pages Headers - Sets cookies with Supabase credentials
+# JavaScript reads these cookies via document.cookie
+# Environment variables: PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY (set in Cloudflare Dashboard)
 
 /index.html
-  X-Supabase-Url: ${PUBLIC_SUPABASE_URL}
-  X-Supabase-Key: ${PUBLIC_SUPABASE_ANON_KEY}
+  Set-Cookie: SUPABASE_URL=${PUBLIC_SUPABASE_URL}; Path=/; HttpOnly; SameSite=Lax
+  Set-Cookie: SUPABASE_KEY=${PUBLIC_SUPABASE_ANON_KEY}; Path=/; HttpOnly; SameSite=Lax
 
-/static/*
-  X-Supabase-Url: ${PUBLIC_SUPABASE_URL}
-  X-Supabase-Key: ${PUBLIC_SUPABASE_ANON_KEY}
+/*
+  Cache-Control: public, max-age=0, must-revalidate

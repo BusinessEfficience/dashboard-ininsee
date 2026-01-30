@@ -1402,23 +1402,47 @@ static/img/logo-instagram-small.png
 // Environment variables: SUPABASE_URL and SUPABASE_KEY (set in Cloudflare Dashboard)
 // =============================================================================
 
-// Get Supabase URL - reads from Worker-injected global variables
+// Helper function to get cookie value
+const getCookie = function(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+        return parts.pop().split(';').shift();
+    }
+    return null;
+};
+
+// Get Supabase URL - reads from cookies set by _headers file
 const getSupabaseUrl = function() {
-    // Priority 1: Read from Worker-injected global variables
+    // Priority 1: Read from cookie (set by Cloudflare _headers)
+    const cookieUrl = getCookie('SUPABASE_URL');
+    if (cookieUrl && cookieUrl.trim() && 
+        cookieUrl !== 'https://your-project.supabase.co' &&
+        cookieUrl.includes('supabase.co')) {
+        return cookieUrl.trim();
+    }
+    // Priority 2: Read from Worker-injected global variables
     if (typeof window.PUBLIC_SUPABASE_URL !== 'undefined' && window.PUBLIC_SUPABASE_URL) {
         return window.PUBLIC_SUPABASE_URL;
     }
-    // Priority 2: Check for placeholders or invalid values
+    // Fallback to placeholder
     return 'https://your-project.supabase.co';
 };
 
-// Get Supabase anon key - reads from Worker-injected global variables
+// Get Supabase anon key - reads from cookies set by _headers file
 const getSupabaseKey = function() {
-    // Priority 1: Read from Worker-injected global variables
+    // Priority 1: Read from cookie (set by Cloudflare _headers)
+    const cookieKey = getCookie('SUPABASE_KEY');
+    if (cookieKey && cookieKey.trim() && 
+        cookieKey !== 'your-anon-key' &&
+        cookieKey.startsWith('eyJ')) {
+        return cookieKey.trim();
+    }
+    // Priority 2: Read from Worker-injected global variables
     if (typeof window.PUBLIC_SUPABASE_ANON_KEY !== 'undefined' && window.PUBLIC_SUPABASE_ANON_KEY) {
         return window.PUBLIC_SUPABASE_ANON_KEY;
     }
-    // Priority 2: Check for placeholders or invalid values
+    // Fallback to placeholder
     return 'your-anon-key';
 };
 
