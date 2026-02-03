@@ -1398,8 +1398,9 @@ static/img/logo-instagram-small.png
 // =============================================================================
 // SUPABASE CONFIGURATION - CLOUDFLARE PAGES COMPATIBLE
 // =============================================================================
-// Credentials are read from custom headers injected by Cloudflare Pages _headers file
-// Environment variables: SUPABASE_URL and SUPABASE_KEY (set in Cloudflare Dashboard)
+// SUPABASE CONFIGURATION - CLOUDFLARE PAGES COMPATIBLE
+// Credentials are injected by functions/_middleware.js as window globals
+// Environment variables: PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY (set in Cloudflare Dashboard)
 // =============================================================================
 
 // Helper function to get cookie value
@@ -1412,35 +1413,35 @@ const getCookie = function(name) {
     return null;
 };
 
-// Get Supabase URL - reads from cookies set by _headers file
+// Get Supabase URL - reads from window globals injected by _middleware.js
 const getSupabaseUrl = function() {
-    // Priority 1: Read from cookie (set by Cloudflare _headers)
+    // Priority 1: Read from Worker-injected global variables (set by _middleware.js)
+    if (typeof window.PUBLIC_SUPABASE_URL !== 'undefined' && window.PUBLIC_SUPABASE_URL) {
+        return window.PUBLIC_SUPABASE_URL;
+    }
+    // Priority 2: Read from cookie (legacy fallback)
     const cookieUrl = getCookie('SUPABASE_URL');
     if (cookieUrl && cookieUrl.trim() && 
         cookieUrl !== 'https://your-project.supabase.co' &&
         cookieUrl.includes('supabase.co')) {
         return cookieUrl.trim();
     }
-    // Priority 2: Read from Worker-injected global variables
-    if (typeof window.PUBLIC_SUPABASE_URL !== 'undefined' && window.PUBLIC_SUPABASE_URL) {
-        return window.PUBLIC_SUPABASE_URL;
-    }
     // Fallback to placeholder
     return 'https://your-project.supabase.co';
 };
 
-// Get Supabase anon key - reads from cookies set by _headers file
+// Get Supabase anon key - reads from window globals injected by _middleware.js
 const getSupabaseKey = function() {
-    // Priority 1: Read from cookie (set by Cloudflare _headers)
+    // Priority 1: Read from Worker-injected global variables (set by _middleware.js)
+    if (typeof window.PUBLIC_SUPABASE_ANON_KEY !== 'undefined' && window.PUBLIC_SUPABASE_ANON_KEY) {
+        return window.PUBLIC_SUPABASE_ANON_KEY;
+    }
+    // Priority 2: Read from cookie (legacy fallback)
     const cookieKey = getCookie('SUPABASE_KEY');
     if (cookieKey && cookieKey.trim() && 
         cookieKey !== 'your-anon-key' &&
         cookieKey.startsWith('eyJ')) {
         return cookieKey.trim();
-    }
-    // Priority 2: Read from Worker-injected global variables
-    if (typeof window.PUBLIC_SUPABASE_ANON_KEY !== 'undefined' && window.PUBLIC_SUPABASE_ANON_KEY) {
-        return window.PUBLIC_SUPABASE_ANON_KEY;
     }
     // Fallback to placeholder
     return 'your-anon-key';
