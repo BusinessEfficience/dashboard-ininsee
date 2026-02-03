@@ -1449,10 +1449,20 @@ const getSupabaseKey = function() {
 const supabaseUrl = getSupabaseUrl();
 const supabaseKey = getSupabaseKey();
 
+// Debug: Log what values were retrieved
+console.log('🔍 Supabase Debug - Retrieved values:');
+console.log('  URL:', supabaseUrl);
+console.log('  Key:', supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'null');
+console.log('  Window globals:', {
+    PUBLIC_SUPABASE_URL: typeof window.PUBLIC_SUPABASE_URL !== 'undefined' ? window.PUBLIC_SUPABASE_URL : 'undefined',
+    PUBLIC_SUPABASE_ANON_KEY: typeof window.PUBLIC_SUPABASE_ANON_KEY !== 'undefined' ? window.PUBLIC_SUPABASE_ANON_KEY.substring(0, 20) + '...' : 'undefined'
+});
+console.log('  Cookies:', document.cookie);
+
 // Check if credentials are properly configured (not using placeholders)
-const isSupabaseConfigured = supabaseUrl !== 'https://your-project.supabase.co' && 
-                             supabaseKey !== 'your-anon-key' &&
-                             supabaseUrl.includes('supabase.co');
+const isSupabaseConfigured = supabaseUrl !== 'https://your-project.supabase.co' &&
+                              supabaseKey !== 'your-anon-key' &&
+                              supabaseUrl.includes('supabase.co');
 
 // Initialize Supabase client (use window.supabase to avoid redeclaration)
 try {
